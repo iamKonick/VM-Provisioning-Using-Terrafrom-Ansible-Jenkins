@@ -1,0 +1,11 @@
+- name: Scan VMs for software compliance
+  hosts: devvms:teamvms:dbvms
+  become: yes
+  become_user: root
+    
+  tasks:
+  - name: Test for presence of AnyDesk
+    shell: if $(`ps -ef | grep -i anydesk | grep -v grep`); then echo "Found AnyDesk"; else echo ""; fi
+    register: test_tw
+  -  debug: msg="{{ test_tw.msg }}"  
+
