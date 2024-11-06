@@ -1,0 +1,28 @@
+- name: Create custom AMI User VM
+  hosts: 127.0.0.1
+  connection: local
+  gather_facts: false
+
+  tasks:
+  - name: Create User VM via AWS-CLI with custom AMI
+    shell: |
+      TAGS="ResourceType=instance,Tags=[{Key=Application,Value=ADC},\
+      {Key=CostCenter,Value=5120/B1-02152},\
+      {Key=Creator,Value='{{ CREATOR }}'},\
+      {Key=ProductLineID,Value=1996375},\
+      {Key=ApplicationID,Value=AID000},\
+      {Key=SupportGroupID,Value=1996799},\
+      {Key=Environment,Value=Development},\
+      {Key=CreatorCompany,Value=DBG},\
+      {Key=Name,Value='ADCashICSD_{{ USERIDVM }}_Dev'},\
+      {Key=Owner,Value='{{ USERIDVM }}'},\
+      {Key=Project,Value=MM-BAU-DEV},\
+      {Key=Product,Value=Settlement},\
+      {Key=Whitelist,Value=FS100;CPU;RAM;H24}]"
+      aws ec2 run-instances --image-id  {{ AMIID }} --region eu-central-1 --placement AvailabilityZone=eu-central-1c \
+      --count 1 --instance-type t3.xlarge --key-name ADCashICSD-dev  --subnet-id subnet-4c7f7a06  \
+      --tag-specifications ${TAGS} \
+      --block-device-mappings "DeviceName=/dev/sdb, Ebs={DeleteOnTermination=true,VolumeSize=130,VolumeType=gp2}" \
+      --security-group-ids sg-0d9cef496aebeea2c 
+    register: ec2inst
+  -  debug: msg="{{ ec2inst }}"    
